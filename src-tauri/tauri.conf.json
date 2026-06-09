@@ -1,0 +1,25 @@
+{
+  "$schema": "[https://schema.tauri.app/config/v2](https://schema.tauri.app/config/v2)",
+  "productName": "WhatsApp Ultimate",
+  "version": "1.0.0",
+  "identifier": "com.teknisys.wa.wrapper",
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "WhatsApp Premium",
+        "width": 1200,
+        "height": 800,
+        "resizable": true,
+        "url": "[https://web.whatsapp.com](https://web.whatsapp.com)",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "additionalBrowserArgs": "--disable-web-security --disable-features=IsolateOrigins,site-per-process --enable-features=NetworkServiceInProcess --ignore-certificate-errors"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  }
+}
