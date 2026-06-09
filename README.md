@@ -6,7 +6,7 @@ Project ini adalah desktop wrapper untuk WhatsApp Web yang dibangun menggunakan 
 
 ## 1. Struktur Direktori Project
 
-Pastikan struktur file di dalam repositori GitHub Anda tersusun seperti ini:
+
 ```text
 ├── .github/
 │   └── workflows/
