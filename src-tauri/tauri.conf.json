@@ -2,7 +2,7 @@
   "build": {
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
-    "devPath": "http://localhost:5173",
+    "devPath": "https://web.whatsapp.com",
     "distDir": "../dist"
   },
   "package": {
@@ -17,7 +17,8 @@
         "scope": ["**"]
       },
       "shell": {
-        "all": true
+        "all": true,
+        "open": true
       },
       "dialog": {
         "all": true
@@ -29,6 +30,9 @@
         "all": true
       },
       "window": {
+        "all": true
+      },
+      "global-shortcut": {
         "all": true
       }
     },
@@ -48,7 +52,7 @@
         "icons/icon.ico"
       ],
       "identifier": "com.whatsapp.web.desktop",
-      "longDescription": "WhatsApp Web Desktop Application with badge support",
+      "longDescription": "WhatsApp Web Desktop Application - No CORS, No Storage Issues",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -66,7 +70,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://static.whatsapp.net https://*.whatsapp.net https://*.facebook.com https://*.fbcdn.net https://www.googletagmanager.com https://maps.googleapis.com https://maps.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.whatsapp.net https://*.whatsapp.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://* https://*.whatsapp.net https://*.facebook.com https://*.fbcdn.net; connect-src 'self' https://*.whatsapp.net https://*.facebook.com https://*.fbcdn.net https://dit.whatsapp.net https://api.whatsapp.com wss://*.whatsapp.net;"
+      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; media-src 'self' blob: https:; frame-src 'self' https:;"
     },
     "systemTray": {
       "iconPath": "icons/32x32.png",
@@ -83,7 +87,9 @@
         "title": "WhatsApp Web Desktop",
         "width": 1200,
         "center": true,
-        "label": "main"
+        "label": "main",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "fileDropEnabled": false
       }
     ]
   }
