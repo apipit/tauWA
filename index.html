@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp Web Desktop</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body, html {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      #badge {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #25D366;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 10000;
+        display: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      }
+      #badge.visible {
+        display: flex;
+      }
+      #badge.zero {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="badge">0</div>
+    <iframe 
+      id="whatsapp-frame"
+      src="https://web.whatsapp.com" 
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-storage-access-by-user-activation"
+      allow="clipboard-read; clipboard-write; camera; microphone; notifications"
+    ></iframe>
+    
+    <script>
+      // Request persistent storage
+      if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().then(granted => {
+          console.log('Persistent storage granted:', granted);
+        });
+      }
+
+      // Badge counter functionality
+      let badgeCount = 0;
+      const badgeElement = document.getElementById('badge');
+
+      function updateBadge(count) {
+        badgeCount = count;
+        if (count > 0) {
+          badgeElement.textContent = count > 99 ? '99+' : count;
+          badgeElement.classList.add('visible');
+          badgeElement.classList.remove('zero');
+          
+          // Set badge via Tauri API if available
+          if (window.__TAURI__) {
+            window.__TAURI__.invoke('set_badge_count', { count: count });
+          }
+          
+          // Update window title
+          document.title = `(${count}) WhatsApp Web Desktop`;
+        } else {
+          badgeElement.classList.remove('visible');
+          badgeElement.classList.add('zero');
+          document.title = 'WhatsApp Web Desktop';
+        }
+      }
+
+      // Monitor WhatsApp Web for unread messages
+      function checkUnreadMessages() {
+        try {
+          const iframe = document.getElementById('whatsapp-frame');
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+          
+          // Try to find unread message indicators
+          // WhatsApp uses various selectors for unread messages
+          const unreadSelectors = [
+            '[class*="unread"]',
+            '[class*="badge"]',
+            'span[class*="unread-count"]',
+            'div[class*="message-count"]'
+          ];
+          
+          let totalUnread = 0;
+          
+          for (const selector of unreadSelectors) {
+            try {
+              const elements = iframeDoc.querySelectorAll(selector);
+              elements.forEach(el => {
+                const count = parseInt(el.textContent);
+                if (!isNaN(count)) {
+                  totalUnread += count;
+                }
+              });
+            } catch (e) {
+              // Selector might not exist
+            }
+          }
+          
+          // Alternative: count chat list items with unread indicator
+          try {
+            const unreadChats = iframeDoc.querySelectorAll('[class*="chat"]:has([class*="unread"]), [class*="conversation"]:has([class*="unread"])');
+            totalUnread += unreadChats.length;
+          } catch (e) {
+            // Cross-origin might block this
+          }
+          
+          if (totalUnread > 0) {
+            updateBadge(totalUnread);
+          }
+        } catch (error) {
+          console.log('Cannot access iframe content (cross-origin):', error);
+        }
+      }
+
+      // Check for unread messages periodically
+      setInterval(checkUnreadMessages, 5000);
+      
+      // Also check on visibility change
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          checkUnreadMessages();
+        }
+      });
+
+      // Listen for messages from iframe (if WhatsApp Web sends any)
+      window.addEventListener('message', (event) => {
+        if (event.data && typeof event.data.unreadCount === 'number') {
+          updateBadge(event.data.unreadCount);
+        }
+      });
+
+      // Initial check
+      setTimeout(checkUnreadMessages, 10000);
+    </script>
+  </body>
+</html>
