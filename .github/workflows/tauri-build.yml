@@ -59,12 +59,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__
-          releaseName: 'WhatsApp Web Desktop v__VERSION__'
-          releaseBody: 'WhatsApp Web Desktop for Windows - No CORS, No Storage Issues'
-          releaseDraft: false
-          prerelease: false
-          includeUpdaterJson: true
+args: --debug
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
