@@ -1,0 +1,103 @@
+name: 'Build Tauri WhatsApp Web'
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.platform }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Rust
+        uses: dtolnay/rust-action@stable
+        with:
+          toolchain: stable
+
+      - name: Install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            webkit2gtk-4.0-dev \
+            libssl-dev \
+            libjavascriptcoregtk-4.0-dev \
+            libsoup-3.0-dev \
+            imagemagick \
+            pngquant
+
+      - name: Download and create WhatsApp icons
+        run: |
+          mkdir -p src-tauri/icons
+          
+          # Download WhatsApp Web icon
+          curl -L "https://static.whatsapp.net/rsrc.php/v3/yR/r/69CuEHlUDhL.png" -o src-tauri/icons/icon-original.png || \
+          curl -L "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" -o src-tauri/icons/icon-original.svg
+          
+          # Convert SVG to PNG if needed
+          if [ -f "src-tauri/icons/icon-original.svg" ]; then
+            convert -background none -size 512x512 src-tauri/icons/icon-original.svg src-tauri/icons/icon-512.png
+          else
+            cp src-tauri/icons/icon-original.png src-tauri/icons/icon-512.png
+          fi
+          
+          # Create required icon sizes
+          convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/32x32.png
+          convert src-tauri/icons/icon-512.png -resize 128x128 src-tauri/icons/128x128.png
+          convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/128x128@2x.png
+          convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.png
+          
+          # Create macOS icon
+          convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.icns
+          
+          # Create Windows icon
+          convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/icon.ico
+          
+          echo "Icons created successfully"
+          ls -la src-tauri/icons/
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'WhatsApp Web Desktop v__VERSION__'
+          releaseBody: 'WhatsApp Web Desktop build with auto-icons and badge support'
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: whatsapp-web-${{ matrix.platform }}
+          path: |
+            src-tauri/target/release/bundle/**/*
+            dist/**/*
