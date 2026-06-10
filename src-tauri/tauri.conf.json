@@ -1,25 +1,90 @@
 {
-  "$schema": "[https://schema.tauri.app/config/v2](https://schema.tauri.app/config/v2)",
-  "productName": "WhatsApp Ultimate",
-  "version": "1.0.0",
-  "identifier": "com.teknisys.wa.wrapper",
   "build": {
-    "frontendDist": "../src"
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "devPath": "http://localhost:5173",
+    "distDir": "../dist"
   },
-  "app": {
+  "package": {
+    "productName": "WhatsApp Web Desktop",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": true,
+      "fs": {
+        "all": true,
+        "scope": ["**"]
+      },
+      "shell": {
+        "all": true
+      },
+      "dialog": {
+        "all": true
+      },
+      "notification": {
+        "all": true
+      },
+      "app": {
+        "all": true
+      },
+      "window": {
+        "all": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "category": "SocialNetworking",
+      "copyright": "",
+      "deb": {
+        "depends": []
+      },
+      "externalBin": [],
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "identifier": "com.whatsapp.web.desktop",
+      "longDescription": "WhatsApp Web Desktop Application with badge support",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "WhatsApp Web Desktop",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://static.whatsapp.net https://*.whatsapp.net https://*.facebook.com https://*.fbcdn.net https://www.googletagmanager.com https://maps.googleapis.com https://maps.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.whatsapp.net https://*.whatsapp.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://* https://*.whatsapp.net https://*.facebook.com https://*.fbcdn.net; connect-src 'self' https://*.whatsapp.net https://*.facebook.com https://*.fbcdn.net https://dit.whatsapp.net https://api.whatsapp.com wss://*.whatsapp.net;"
+    },
+    "systemTray": {
+      "iconPath": "icons/32x32.png",
+      "iconAsTemplate": true
+    },
+    "updater": {
+      "active": false
+    },
     "windows": [
       {
-        "title": "WhatsApp Premium",
-        "width": 1200,
+        "fullscreen": false,
         "height": 800,
         "resizable": true,
-        "url": "[https://web.whatsapp.com](https://web.whatsapp.com)",
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "additionalBrowserArgs": "--disable-web-security --disable-features=IsolateOrigins,site-per-process --enable-features=NetworkServiceInProcess --ignore-certificate-errors"
+        "title": "WhatsApp Web Desktop",
+        "width": 1200,
+        "center": true,
+        "label": "main"
       }
-    ],
-    "security": {
-      "csp": null
-    }
+    ]
   }
 }
