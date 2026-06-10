@@ -26,8 +26,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install Rust
-        uses: dtolnay/rust-action@stable
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
 
@@ -44,22 +44,17 @@ jobs:
             libjavascriptcoregtk-4.0-dev \
             libsoup-3.0-dev \
             imagemagick \
-            pngquant
+            curl
 
       - name: Download and create WhatsApp icons
         run: |
           mkdir -p src-tauri/icons
           
-          # Download WhatsApp Web icon
-          curl -L "https://static.whatsapp.net/rsrc.php/v3/yR/r/69CuEHlUDhL.png" -o src-tauri/icons/icon-original.png || \
+          # Download WhatsApp icon from official source
           curl -L "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" -o src-tauri/icons/icon-original.svg
           
-          # Convert SVG to PNG if needed
-          if [ -f "src-tauri/icons/icon-original.svg" ]; then
-            convert -background none -size 512x512 src-tauri/icons/icon-original.svg src-tauri/icons/icon-512.png
-          else
-            cp src-tauri/icons/icon-original.png src-tauri/icons/icon-512.png
-          fi
+          # Convert SVG to PNG
+          convert -background none -size 512x512 src-tauri/icons/icon-original.svg src-tauri/icons/icon-512.png
           
           # Create required icon sizes
           convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/32x32.png
@@ -67,11 +62,21 @@ jobs:
           convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/128x128@2x.png
           convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.png
           
-          # Create macOS icon
-          convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.icns
+          # Create macOS icon (.icns)
+          mkdir -p src-tauri/icons/icon.iconset
+          convert src-tauri/icons/icon-512.png -resize 16x16 src-tauri/icons/icon.iconset/icon_16x16.png
+          convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/icon.iconset/icon_16x16@2x.png
+          convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/icon.iconset/icon_32x32.png
+          convert src-tauri/icons/icon-512.png -resize 64x64 src-tauri/icons/icon.iconset/icon_32x32@2x.png
+          convert src-tauri/icons/icon-512.png -resize 128x128 src-tauri/icons/icon.iconset/icon_128x128.png
+          convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/icon.iconset/icon_128x128@2x.png
+          convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/icon.iconset/icon_256x256.png
+          convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.iconset/icon_256x256@2x.png
+          convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.iconset/icon_512x512.png
+          iconutil -c icns src-tauri/icons/icon.iconset -o src-tauri/icons/icon.icns
           
-          # Create Windows icon
-          convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/icon.ico
+          # Create Windows icon (.ico)
+          convert src-tauri/icons/icon-512.png -define icon:auto-resize=256,128,64,48,32,16 src-tauri/icons/icon.ico
           
           echo "Icons created successfully"
           ls -la src-tauri/icons/
@@ -89,7 +94,7 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'WhatsApp Web Desktop v__VERSION__'
-          releaseBody: 'WhatsApp Web Desktop build with auto-icons and badge support'
+          releaseBody: 'WhatsApp Web Desktop - No CORS, No Storage Issues'
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
