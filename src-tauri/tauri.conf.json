@@ -31,9 +31,6 @@
       },
       "window": {
         "all": true
-      },
-      "global-shortcut": {
-        "all": true
       }
     },
     "bundle": {
