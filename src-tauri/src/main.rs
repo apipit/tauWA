@@ -15,6 +15,13 @@ fn get_unread_count(state: tauri::State<AppState>) -> i32 {
     *state.unread_count.lock().unwrap()
 }
 
+#[tauri::command]
+fn update_unread_count(state: tauri::State<AppState>, count: i32) {
+    let mut unread = state.unread_count.lock().unwrap();
+    *unread = count;
+    println!("Unread count updated: {}", count);
+}
+
 fn create_system_tray() -> SystemTray {
     let menu = SystemTrayMenu::new()
         .add_item(CustomMenuItem::new("show", "Show WhatsApp"))
@@ -61,45 +68,50 @@ fn main() {
             }
             _ => {}
         })
-        .invoke_handler(tauri::generate_handler![get_unread_count])
+        .invoke_handler(tauri::generate_handler![get_unread_count, update_unread_count])
         .setup(|app| {
-            // Set custom user agent to avoid detection issues
             let window = app.get_window("main").unwrap();
             
-            // Listen for title changes to detect unread messages
+            // Inject JavaScript to monitor title changes
             // WhatsApp Web updates title to "(3) WhatsApp" when there are unread messages
-            let app_handle = app.handle();
-            window.on_title_change(move |title| {
-                let unread = parse_unread_from_title(title);
-                println!("Title changed: {} -> Unread: {}", title, unread);
-                
-                // Update badge on macOS
-                #[cfg(target_os = "macos")]
-                {
-                    app_handle.set_badge_count(unread).unwrap();
-                }
-                
-                // Update system tray tooltip
-                if unread > 0 {
-                    println!("You have {} unread messages", unread);
-                }
-            });
+            let js_code = r#"
+                (function() {
+                    let lastTitle = document.title;
+                    
+                    function checkTitle() {
+                        const currentTitle = document.title;
+                        if (currentTitle !== lastTitle) {
+                            lastTitle = currentTitle;
+                            
+                            // Parse unread count from title
+                            let unreadCount = 0;
+                            const match = currentTitle.match(/^\((\d+)\)/);
+                            if (match) {
+                                unreadCount = parseInt(match[1]);
+                            }
+                            
+                            // Send to Tauri backend
+                            if (window.__TAURI__) {
+                                window.__TAURI__.invoke('update_unread_count', { count: unreadCount });
+                            }
+                            
+                            console.log('Title changed:', currentTitle, 'Unread:', unreadCount);
+                        }
+                    }
+                    
+                    // Check every 2 seconds
+                    setInterval(checkTitle, 2000);
+                    
+                    // Initial check
+                    setTimeout(checkTitle, 3000);
+                })();
+            "#;
+            
+            // Execute JavaScript in the window
+            window.eval(js_code).unwrap();
             
             Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-fn parse_unread_from_title(title: &str) -> i32 {
-    // WhatsApp Web format: "(3) WhatsApp" or "WhatsApp"
-    if title.starts_with('(') {
-        if let Some(end_paren) = title.find(')') {
-            let count_str = &title[1..end_paren];
-            if let Ok(count) = count_str.parse::<i32>() {
-                return count;
-            }
-        }
-    }
-    0
 }
