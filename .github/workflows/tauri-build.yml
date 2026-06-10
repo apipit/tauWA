@@ -45,40 +45,56 @@ jobs:
             imagemagick \
             curl
 
-      - name: Download and create WhatsApp icons
-        run: |
-          mkdir -p src-tauri/icons
-          
-          # Download WhatsApp icon from official source
-          curl -L "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" -o src-tauri/icons/icon-original.svg
-          
-          # Convert SVG to PNG
-          convert -background none -size 512x512 src-tauri/icons/icon-original.svg src-tauri/icons/icon-512.png
-          
-          # Create required icon sizes
-          convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/32x32.png
-          convert src-tauri/icons/icon-512.png -resize 128x128 src-tauri/icons/128x128.png
-          convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/128x128@2x.png
-          convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.png
-          
-          # Create macOS icon (.icns)
-          mkdir -p src-tauri/icons/icon.iconset
-          convert src-tauri/icons/icon-512.png -resize 16x16 src-tauri/icons/icon.iconset/icon_16x16.png
-          convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/icon.iconset/icon_16x16@2x.png
-          convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/icon.iconset/icon_32x32.png
-          convert src-tauri/icons/icon-512.png -resize 64x64 src-tauri/icons/icon.iconset/icon_32x32@2x.png
-          convert src-tauri/icons/icon-512.png -resize 128x128 src-tauri/icons/icon.iconset/icon_128x128.png
-          convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/icon.iconset/icon_128x128@2x.png
-          convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/icon.iconset/icon_256x256.png
-          convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.iconset/icon_256x256@2x.png
-          convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.iconset/icon_512x512.png
-          iconutil -c icns src-tauri/icons/icon.iconset -o src-tauri/icons/icon.icns
-          
-          # Create Windows icon (.ico)
-          convert src-tauri/icons/icon-512.png -define icon:auto-resize=256,128,64,48,32,16 src-tauri/icons/icon.ico
-          
-          echo "Icons created successfully"
-          ls -la src-tauri/icons/
+- name: Download and create WhatsApp icons
+  run: |
+    mkdir -p src-tauri/icons
+    
+    # Download WhatsApp icon
+    curl -L "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" -o src-tauri/icons/icon-original.svg
+    
+    # Convert SVG to PNG
+    convert -background none -size 512x512 src-tauri/icons/icon-original.svg src-tauri/icons/icon-512.png
+    
+    # Create required icon sizes
+    convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/32x32.png
+    convert src-tauri/icons/icon-512.png -resize 128x128 src-tauri/icons/128x128.png
+    convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/128x128@2x.png
+    convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.png
+    
+    echo "Basic icons created"
+
+- name: Create macOS icons
+  if: matrix.platform == 'macos-latest'
+  run: |
+    # Create macOS icon (.icns)
+    mkdir -p src-tauri/icons/icon.iconset
+    convert src-tauri/icons/icon-512.png -resize 16x16 src-tauri/icons/icon.iconset/icon_16x16.png
+    convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/icon.iconset/icon_16x16@2x.png
+    convert src-tauri/icons/icon-512.png -resize 32x32 src-tauri/icons/icon.iconset/icon_32x32.png
+    convert src-tauri/icons/icon-512.png -resize 64x64 src-tauri/icons/icon.iconset/icon_32x32@2x.png
+    convert src-tauri/icons/icon-512.png -resize 128x128 src-tauri/icons/icon.iconset/icon_128x128.png
+    convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/icon.iconset/icon_128x128@2x.png
+    convert src-tauri/icons/icon-512.png -resize 256x256 src-tauri/icons/icon.iconset/icon_256x256.png
+    convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.iconset/icon_256x256@2x.png
+    convert src-tauri/icons/icon-512.png -resize 512x512 src-tauri/icons/icon.iconset/icon_512x512.png
+    iconutil -c icns src-tauri/icons/icon.iconset -o src-tauri/icons/icon.icns
+    rm -rf src-tauri/icons/icon.iconset
+    echo "macOS icons created"
+
+- name: Create Windows icons
+  if: matrix.platform == 'windows-latest'
+  shell: pwsh
+  run: |
+    # Create Windows icon (.ico) with multiple sizes
+    convert src-tauri/icons/icon-512.png -define icon:auto-resize=256,128,64,48,32,16 src-tauri/icons/icon.ico
+    Write-Host "Windows icons created"
+    Get-ChildItem src-tauri/icons/
+    
+- name: Create Linux icons
+  if: matrix.platform == 'ubuntu-latest'
+  run: |
+    # Linux doesn't need special icon format, PNG is fine
+    echo "Linux icons ready"
 
       - name: Install frontend dependencies
         run: npm install
