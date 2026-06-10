@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:
+  workflow_dispatch:  # Memungkinkan manual trigger dari tab Actions
 
 jobs:
   build:
@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # Cache dihapus untuk menghindari error lock file
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -58,7 +57,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:args: --debug
+        with:
+          args: --debug
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -67,4 +67,5 @@ jobs:
           path: |
             src-tauri/target/release/bundle/**/*.exe
             src-tauri/target/release/bundle/**/*.msi
-            dist/**/*
+            src-tauri/target/debug/bundle/**/*.exe
+            src-tauri/target/debug/bundle/**/*.msi
