@@ -1,14 +1,20 @@
 [package]
-name = "whatsapp-ultimate"
+name = "whatsapp-web-desktop"
 version = "1.0.0"
+description = "WhatsApp Web Desktop with badge support"
+authors = ["you"]
+license = "MIT"
+repository = ""
 edition = "2021"
 
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
 [dependencies]
-tauri = { version = "2.0.0", features = ["devtools"] }
+tauri = { version = "1.6", features = [ "window-all", "shell-all", "notification-all", "fs-all", "dialog-all", "app-all", "system-tray","devtools"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
-[profile.release]
-panic = "abort"
-codegen-units = 1
-lto = true
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
