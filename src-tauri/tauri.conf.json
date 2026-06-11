@@ -1,93 +1,40 @@
 {
+  "productName": "Progress Tracker",
+  "version": "1.0.0",
+  "identifier": "com.progress.tracker",
   "build": {
-    "beforeBuildCommand": "npm run build",
-    "beforeDevCommand": "npm run dev",
-    "devPath": "https://web.whatsapp.com",
-    "distDir": "../dist"
+    "beforeDevCommand": "bun run dev",
+    "beforeBuildCommand": "bun run build",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
   },
-  "package": {
-    "productName": "WhatsApp Web Desktop",
-    "version": "1.0.0"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": true,
-      "fs": {
-        "all": true,
-        "scope": ["**"]
-      },
-      "shell": {
-        "all": true,
-        "open": true
-      },
-      "dialog": {
-        "all": true
-      },
-      "notification": {
-        "all": true
-      },
-      "app": {
-        "all": true
-      },
-      "window": {
-        "all": true
-      }
-    },
-    "bundle": {
-      "active": true,
-      "category": "SocialNetworking",
-      "copyright": "",
-      "deb": {
-        "depends": []
-      },
-      "externalBin": [],
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "identifier": "com.whatsapp.web.desktop",
-      "longDescription": "WhatsApp Web Desktop Application - No CORS, No Storage Issues",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": [],
-      "shortDescription": "WhatsApp Web Desktop",
-      "targets": "all",
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
-      }
-    },
-    "security": {
-      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; img-src 'self' data: blob: https:; connect-src 'self' https: wss:; media-src 'self' blob: https:; frame-src 'self' https:;"
-    },
-    "systemTray": {
-      "iconPath": "icons/32x32.png",
-      "iconAsTemplate": true
-    },
-    "updater": {
-      "active": false
-    },
+  "app": {
     "windows": [
       {
-        "fullscreen": false,
-        "height": 800,
-        "resizable": true,
-        "title": "WhatsApp Web Desktop",
-        "width": 1200,
-        "center": true,
-        "label": "main",
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "fileDropEnabled": false
+        "label": "dashboard",
+        "title": "Work Progress Dashboard",
+        "width": 500,
+        "height": 720,
+        "x": 0,
+        "y": 0
+      },
+      {
+        "label": "whatsapp",
+        "title": "Live WhatsApp Workspace",
+        "url": "https://web.whatsapp.com",
+        "width": 900,
+        "height": 720,
+        "x": 510,
+        "y": 0,
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
       }
-    ]
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all"
   }
 }
